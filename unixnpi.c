@@ -23,40 +23,49 @@ int main(int argc, char *argv[])
 	uchar ltSeqNo;
 	int i, j, k;
 	
+	k = 1;
+	
 	/* Initialization */
 	fprintf(stdout, "\n");
 	fprintf(stdout, "UnixNPI - a Newton Package Installer for Unix platforms\n");
 	fprintf(stdout, "Version 1.1.3 by Richard C. L. Li, Victor Rehorst, Chayam Kirshen\n");
-	fprintf(stdout, "This program is distributed under the terms of
-the GNU GPL: see the file COPYING\n");
+	fprintf(stdout, "This program is distributed under the terms of the GNU GPL: see the file COPYING\n");
 
 	/* Install time out function */
 	if(signal(SIGALRM, SigAlrm) == SIG_ERR)
 		ErrHandler("Error in setting up timeout function!!");
 
-	/* Get user configuration */
-	strcpy(sendBuf, getenv("HOME"));
-	strcat(sendBuf, "/.unixnpi.rc");
-	if((inFile = fopen(sendBuf, "r")) == NULL)
-		ErrHandler("Error in opening configuration file!!\nMake sure you have the file ~/.unixnpi.rc");
-	fscanf(inFile, "NewtDev = %s\n", newtDevInfo.devName);
-	fscanf(inFile, "Speed = %d\n", &newtDevInfo.speed);
-	fclose(inFile);
-
-	/* Open package file */
+	/* Check arguments */
 	if(argc < 2)
-		ErrHandler("Usage: unixnpi PkgFiles...");
+		ErrHandler("Usage: unixnpi [-s speed] PkgFiles...");
+	else
+	{
+		if (strcmp(argv[1],"-s") == 0)
+		{
+			if (argc < 4)
+				ErrHandler("Usage: unixnpi [-s speed] PkgFiles...");
+			newtDevInfo.speed = atoi(argv[2]);
+			k = 3;
+		}
+		else
+		{
+			newtDevInfo.speed = 38400;
+			k = 1;
+		}
+	}
+
+	strcpy(newtDevInfo.devName, "/dev/newton");
 
 	/* Initialize Newton device */
 	if((newtFd = InitNewtDev(&newtDevInfo)) < 0)
-		ErrHandler("Error in opening Newton device!!");
+		ErrHandler("Error in opening Newton device!!\nDo you have a symlink to /dev/newton?");
 	ltSeqNo = 0;
 	
 	/* Waiting to connect */
 	fprintf(stdout, "\nWaiting to connect\n");
 	do {
 		while(RecvFrame(newtFd, recvBuf) < 0);
-		} while(recvBuf[1] != '\x01');
+	} while(recvBuf[1] != '\x01');
 	fprintf(stdout, "Connected\n");
 	fprintf(stdout, "Handshaking");
 	fflush(stdout);
@@ -121,7 +130,7 @@ the GNU GPL: see the file COPYING\n");
 	fflush(stdout);
 
 	/* batch install all of the files */
-	for (k = 1; k < argc; k++)
+	for (k; k < argc; k++)
 	{
 		/* load the file */
 		if((inFile = fopen(argv[k], "rb")) == NULL)
