@@ -1,7 +1,8 @@
-UnixNPI 1.1.1, a package installer for UN*X systems
-written by Richard C.I. Li
-modified by Chayim I. Kirshen <ckirshen@linuxppc.org>
-maintained by Victor Rehorst <chuma@chuma.org>
+UnixNPI 1.1.3, a package installer for UN*X systems
+originally written by Richard C.I. Li
+modified and maintained by:
+	Chayim I. Kirshen <ckirshen@linuxppc.org>
+	Victor Rehorst <chuma@chuma.org>
 
 The original UnixNPI homepage is at:
 http://www.ee.cityu.edu.hk/~clli/unixnpi.html

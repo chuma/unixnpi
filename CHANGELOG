@@ -1,5 +1,8 @@
 1.1.3:
 - Added batch uploading capability (Victor R.)
+- Removed the need for a $HOME/.unixnpi.rc file - now reads serial speed 
+from the command line (defaults to 38400) and requires the existence of 
+/dev/newton (symlink it to the appropriate serial device)
 
 1.1.2:
 - fixed registration removal - now actually works, and cleaner too! 
