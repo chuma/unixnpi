@@ -1,0 +1,57 @@
+Notes
+{labels: 'Newt, viewfont: {family: 'espy, face:0, size:10}}
+BuildFastSerial
+func(speed)
+begin
+	:DefConst('kSpeed, speed);
+	:DefConst('kSpdStr, SPrintObject(kSpeed));
+	:DefConst('kAppSymbol, Intern("Serial" & kSpdStr & ":clli"));
+	:DoObj('build, "FastSerial");
+	:SaveApp('FastSerial);
+end
+-----
+FastSerial
+//:BuildFastSerial(57600)
+//:BuildFastSerial(115200)
+//:BuildFastSerial(230400)
+{
+	viewClass: clView,
+	appSymbol: kAppSymbol,
+	viewBounds: RelBounds(0, 0, 10, 10),
+	_package: {
+		text: "Serial " & kSpdStr,
+		shortTitle: "Serial " & kSpdStr,
+		partData: {}
+	}
+}
+-----
+FastSerial._package.InstallScript
+func(partFrame, removeFrame)
+begin
+	RegDesktopConnTransport(kAppSymbol, {name: "Serial " & kSpdStr, openOptions: partData.openOptions, useEOP: nil});
+end
+-----
+FastSerial._package.RemoveScript
+func(removeFrame)
+begin
+	UnregDesktopConnTransport(kAppSymbol)
+end
+-----
+FastSerial._package.TapAction
+func() begin
+	GetRoot():Notify(0, "Serial " & kSpdStr, "\nThis extension allows docking with " & kSpdStr & "bps.\n\n\nby Richard C. L. Li\nclli@kagi.com");
+	return nil;
+end
+-----
+FastSerial._package.partData.openOptions
+func()
+begin
+	return [{label: "mnps", type: 'service, opCode: 512},
+		{label: "siop", type: 'option, opCode: 256, data: {arglist: [0, 0, 8, kSpeed], typeList: [10, 1, 2, 1, 1]}},
+		{label: "mnpn", type: 'option, opCode: 256, data: {arglist: [57600], typeList: [10, 1]}},
+		{label: "mnpc", type: 'option, opCode: 512, data: {arglist: [11], typeList: [10, 1]}},
+		{label: "mnpa", type: 'option, opCode: 512, data: {arglist: [true], typeList: [10, 5]}},
+		{label: "eter", type: 'option, opCode: 256, data: {arglist: [kSpeed], typeList: [10, 1]}}];
+end
+-----	
+BYE!

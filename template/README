@@ -1,0 +1,85 @@
+
+Introduction
+
+To upload a Newton package to your favorite MessagePad, you need a Newton
+Package Installer. The package installer supplied by Apple can only support
+MacOS and Windows. For Linux users, installing a Newton package is rather
+clumsy, you need to reboot your machine to startup Windows and reboot again
+after you have finished.
+
+To enable a user to upload Newton packages under a Linux environment, you can
+use some communication packages, but these programs cannot give good uploading
+speed. Therefore I intended to develope a Newton Package Uploader for Linux
+environment which target for speed and simple. Also, the package uploader will
+be ported to varies Unix platforms to benifit others Unix users.
+
+The advantages to use the UnixNPI is that you do not need to have a
+communication package inside your Newton MessagePad. It uses the built in
+package uploading protocol for uploading. The time need to upload a package
+will be the same as your Windows or MacOS Package Installer, which is much
+faster than using other communication packages.
+
+-------------------------------------------------------------------------------
+
+Features
+
+   - Easy to use
+   - Fast package uploading
+   - Unlimited Package size (for registered user only)
+   - Use the built in "Connection" application
+   - No need for additional software in your Newton
+
+-------------------------------------------------------------------------------
+
+Archive Contents
+
+   unixnpi             binary executable
+   unixnpi.rc          sample configuration file
+   StatueMonitor.pkg   test package for unixnpi
+   README              this file
+
+-------------------------------------------------------------------------------
+
+Installation
+
+   1. Get the archive for your machine type.
+   2. Unpack the archive.
+   3. Copy the executable "unixnpi" to your executable search path.
+   4. Copy the file "unixnpi.rc" to your home directory as ".unixnpi.rc".
+   5. Edit the file ".unixnpi.rc" to set the path for your Newton Device or
+      create a symbolic link of "/dev/newton" for your device.
+   6. If you have "Ser57600.pkg", "Ser115200.pkg" or "Ser230400.pkg" installed,
+      set the speed to 57600, 115200 or 230400 respectively.
+
+-------------------------------------------------------------------------------
+
+Usage
+
+   1. Type "unixnpi <Newton package filename>" in your terminal. 
+   2. Use the connection utility same as you use the NBU
+      For Newton MP 100, 120 and 130 users: 
+         1. Open extra drawer in your Newton MessagePad. 
+         2. Tap "Connection". 
+         3. Select "Serial" or "Serial 57600" with "Ser57600.pkg" installed. 
+         4. Tap "Connect". 
+      For Newton MP2000 users: 
+         1. Tap "Dock" icon. 
+         2. Select "Serial", if you have "Ser57600.pkg", "Ser115200.pkg" or
+            "Ser230400.pkg" installed, you can select "Serial 57600", "Serial
+            115200" or "Serial 230400" respectively. 
+         3. Select "Connect". 
+
+-------------------------------------------------------------------------------
+
+Registration
+
+UnixNPI is a shareware, please register!!
+
+Registeration fee for UnixNPI is US$11
+
+   Register through Kagi:
+      Please Check homepage of UnixNPI
+         
+         www.ee.cityu.edu.hk/~clli/unixnpi.html
+
+-------------------------------------------------------------------------------
