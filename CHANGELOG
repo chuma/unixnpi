@@ -1,0 +1,21 @@
+1.1.3:
+- Added batch uploading capability (Victor R.)
+
+1.1.2:
+- fixed registration removal - now actually works, and cleaner too! 
+(Victor R. and Dakkar <ceccarel@cibs.sns.it>)
+- added 'clean' option to Makefile
+- removed encrypt.c and encrypt.h (was used for the old registration code, 
+now completely unnecessary)
+- created INSTALL file
+- created this (CHANGELOG) file
+- fixed COPYING file
+
+
+1.1.1:
+- removed registration requirement (Chayim I. Kirshen)
+- changed start message to reflect new licence (Victor R.)
+- simplified Makefile (Victor R.)
+- modified README (Victor R.)
+
+

@@ -1,0 +1,9 @@
+1)  Compile the program: 'make'
+
+2)  Copy the template/unixnpi.rc to ~/.unixnpi.rc and edit accordingly.
+
+3)  Make sure you have appropriate permissions to read/write to the 
+serial port.
+
+That's all!  You can copy the unixnpi binary anywhere in your path you 
+like.

@@ -1,4 +1,4 @@
-/* UnixNPI 1.1.1 */
+/* UnixNPI 1.1.3 */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,25 +11,22 @@
 /* Function prototype */
 void SigAlrm(int sigNo);
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	FILE *inFile;
 	long inFileLen;
 	long tmpFileLen;
 	uchar sendBuf[MaxHeadLen + MaxInfoLen];
 	uchar recvBuf[MaxHeadLen + MaxInfoLen];
-	char regCode[256];
-	int regMode1, regMode2;
 	NewtDevInfo newtDevInfo;
 	int newtFd;
 	uchar ltSeqNo;
-	int i, j;
+	int i, j, k;
 	
 	/* Initialization */
-	regCode[0] = '\0';
 	fprintf(stdout, "\n");
 	fprintf(stdout, "UnixNPI - a Newton Package Installer for Unix platforms\n");
-	fprintf(stdout, "Version 1.1.1 by Richard C. L. Li\n");
+	fprintf(stdout, "Version 1.1.3 by Richard C. L. Li, Victor Rehorst, Chayam Kirshen\n");
 	fprintf(stdout, "This program is distributed under the terms of
 the GNU GPL: see the file COPYING\n");
 
@@ -41,21 +38,15 @@ the GNU GPL: see the file COPYING\n");
 	strcpy(sendBuf, getenv("HOME"));
 	strcat(sendBuf, "/.unixnpi.rc");
 	if((inFile = fopen(sendBuf, "r")) == NULL)
-		ErrHandler("Error in opening configuration file!!");
+		ErrHandler("Error in opening configuration file!!\nMake sure you have the file ~/.unixnpi.rc");
 	fscanf(inFile, "NewtDev = %s\n", newtDevInfo.devName);
 	fscanf(inFile, "Speed = %d\n", &newtDevInfo.speed);
-	fscanf(inFile, "RegCode = %s\n", regCode);
 	fclose(inFile);
 
 	/* Open package file */
-	if(argc != 2)
-		ErrHandler("Usage: unixnpi <Package File Name>");
-	if((inFile = fopen(argv[1], "rb")) == NULL)
-		ErrHandler("Error in opening package file!!");
-	fseek(inFile, 0, SEEK_END);
-	inFileLen = ftell(inFile);
-	rewind(inFile);
-	
+	if(argc < 2)
+		ErrHandler("Usage: unixnpi PkgFiles...");
+
 	/* Initialize Newton device */
 	if((newtFd = InitNewtDev(&newtDevInfo)) < 0)
 		ErrHandler("Error in opening Newton device!!");
@@ -89,7 +80,7 @@ the GNU GPL: see the file COPYING\n");
 	alarm(TimeOut);
 	do {
 		SendLTFrame(newtFd, ltSeqNo, "newtdockdock\0\0\0\4\0\0\0\4", 20);
-		} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
+	} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
 	ltSeqNo++;
 	fprintf(stdout, ".");
 	fflush(stdout);
@@ -113,23 +104,11 @@ the GNU GPL: see the file COPYING\n");
 		}
 	sendBuf[j] = '\0';
 
-	/* Check registration */
-	if((i = strlen(sendBuf)) < 6) {
-		j = 0;
-		while(i < 6)
-			sendBuf[i++] = sendBuf[j++] + 3;
-		sendBuf[i] = '\0';
-		}
-	Encrypt(recvBuf, sendBuf);
-	recvBuf[8] = '\0';
-	regMode1 = strcmp(recvBuf, regCode);
-	regMode2 = ~ strcmp(recvBuf, regCode);
-
 	/* Send LT frame newtdockstim */
 	alarm(TimeOut);
 	do {
 		SendLTFrame(newtFd, ltSeqNo, "newtdockstim\0\0\0\4\0\0\0\x1e", 20);
-		} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
+	} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
 	ltSeqNo++;
 	fprintf(stdout, ".");
 	fflush(stdout);
@@ -138,83 +117,75 @@ the GNU GPL: see the file COPYING\n");
 	alarm(TimeOut);
 	while(RecvFrame(newtFd, recvBuf) < 0 || recvBuf[1] != '\x04');
 	SendLAFrame(newtFd, recvBuf[2]);
-	fprintf(stdout, ".");
-	fflush(stdout);
-
-	regMode1 = 0;
-	regMode2 = 0;
-	
-	/* Send LT frame newtdocklpkg */
-	alarm(TimeOut);
-	strcpy(sendBuf, "newtdocklpkg");
-	tmpFileLen = inFileLen;
-	if(regMode1 != 0 && inFileLen * 2 + 3 > 32768 * 2 + 3)
-		tmpFileLen = 32768 + 256;
-	if(~regMode2 != 0 && inFileLen * 3 + 5 > 32768 * 3 + 5)
-		tmpFileLen = 32768 + 256;
-	for(i = 15; i >= 12; i--) {
-		sendBuf[i] = tmpFileLen % 256;
-		tmpFileLen /= 256;
-		}
-	do {
-		SendLTFrame(newtFd, ltSeqNo, sendBuf, 16);
-		} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
-	ltSeqNo++;
 	fprintf(stdout, ".\n");
-
-	/* Print unregister screen */
-	if(regMode1 != 0) {
-		fprintf(stdout, "\n");
-		fprintf(stdout, "***************************************************\n");
-		fprintf(stdout, "**               Unregistered Copy               **\n");
-		fprintf(stdout, "**   Package size will be limited to 32K bytes   **\n");
-		fprintf(stdout, "**                                               **\n");
-		fprintf(stdout, "**   UnixNPI is a shareware, please register!!   **\n");
-		fprintf(stdout, "***************************************************\n");
-		fprintf(stdout, "\n");
-		}
-
-	fprintf(stdout, "Sending %d / %d\r", 0, inFileLen);
 	fflush(stdout);
-	
-	/* Send package data */
-	while(!feof(inFile)) {
+
+	/* batch install all of the files */
+	for (k = 1; k < argc; k++)
+	{
+		/* load the file */
+		if((inFile = fopen(argv[k], "rb")) == NULL)
+			ErrHandler("Error in opening package file!!");
+		fseek(inFile, 0, SEEK_END);
+		inFileLen = ftell(inFile);
+		rewind(inFile);
+		printf("File is '%s'\n", argv[k]);
+
+		/* Send LT frame newtdocklpkg */
 		alarm(TimeOut);
-		if(regMode1 != 0 && ftell(inFile) * 3 + 7 > 32768 * 3 + 7)
-			SigInt(0);
-		i = fread(sendBuf, sizeof(uchar), MaxInfoLen, inFile);
-		while(i % 4 != 0)
-			sendBuf[i++] = '\0';
-		do {
-			SendLTFrame(newtFd, ltSeqNo, sendBuf, i);
-			} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
-		ltSeqNo++;
-		if(ltSeqNo % 4 == 0) {
-			fprintf(stdout, "Sending %d / %d\r", ftell(inFile), inFileLen);
-			fflush(stdout);
+		strcpy(sendBuf, "newtdocklpkg");
+		tmpFileLen = inFileLen;
+		for(i = 15; i >= 12; i--) {
+			sendBuf[i] = tmpFileLen % 256;
+			tmpFileLen /= 256;
 			}
-		if(~regMode2 != 0 && ftell(inFile) * 2 + 5 > 32768 * 2 + 5)
-			SigInt(0);
+		do {
+			SendLTFrame(newtFd, ltSeqNo, sendBuf, 16);
+		} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
+		ltSeqNo++;
+		/* fprintf(stdout, ".\n"); */
+
+		fprintf(stdout, "Sending %d / %d\r", 0, inFileLen);
+		fflush(stdout);
+	
+		/* Send package data */
+		while(!feof(inFile)) {
+			alarm(TimeOut);
+			i = fread(sendBuf, sizeof(uchar), MaxInfoLen, inFile);
+			while(i % 4 != 0)
+				sendBuf[i++] = '\0';
+			do {
+				SendLTFrame(newtFd, ltSeqNo, sendBuf, i);
+			} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
+			ltSeqNo++;
+			if(ltSeqNo % 4 == 0) {
+				fprintf(stdout, "Sending %d / %d\r", ftell(inFile), inFileLen);
+				fflush(stdout);
+			}
 		}
-	fprintf(stdout, "Sending %d / %d\n", inFileLen, inFileLen);
+		fprintf(stdout, "Sending %d / %d\n", inFileLen, inFileLen);
 	
-	/* Wait LT frame newtdockdres */
-	alarm(TimeOut);
-	while(RecvFrame(newtFd, recvBuf) < 0 || recvBuf[1] != '\x04');
-	SendLAFrame(newtFd, recvBuf[2]);
-	
+		/* Wait LT frame newtdockdres */
+		alarm(TimeOut);
+		while(RecvFrame(newtFd, recvBuf) < 0 || recvBuf[1] != '\x04');
+		SendLAFrame(newtFd, recvBuf[2]);
+
+		fclose (inFile);
+
+	} /* END OF FOR LOOP */
+
 	/* Send LT frame newtdockdisc */
 	alarm(TimeOut);
 	do {
 		SendLTFrame(newtFd, ltSeqNo, "newtdockdisc\0\0\0\0", 16);
-		} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
+	} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
 	
 	/* Wait disconnect */
 	alarm(0);
 	WaitLDFrame(newtFd);
 	fprintf(stdout, "Finished!!\n\n");
 			
-	fclose(inFile);
+	/* fclose(inFile); */
 	close(newtFd);
 	return 0;
 }

@@ -2,18 +2,18 @@ CC = gcc
 
 TARGET = unixnpi
 
-SRCS = newtmnp.c encrypt.c unixnpi.c
+SRCS = newtmnp.c unixnpi.c
 
-all: elf
+all: unixnpi
 
 debug:
 	cp *.c backup
 	cp *.h backup
-	$(CC) -g -m486 -o $(TARGET) $(SRCS)
-	$(CC) -g -m486 -o regcode regcode.c encrypt.c newtmnp.c
+	$(CC) -g -o $(TARGET) $(SRCS)
 	
-elf:
+unixnpi:
 	$(CC) -o $(TARGET) $(SRCS)
 
-aout:
-	$(CC) -b i486-linuxaout -o $(TARGET) $(SRCS)
+clean:
+	rm -f $(TARGET)
+
