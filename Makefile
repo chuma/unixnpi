@@ -1,4 +1,5 @@
-CC = gcc
+# change this if your compiler isn't GCC
+CC = cc
 
 TARGET = unixnpi
 

@@ -1,3 +1,10 @@
+1.1.4:
+- Changed Makefile to use cc by default instead of gcc
+- Added progress bar (Phil <phil@squack.com>)
+- Added -d switch for specifying device name (Hendrik Lipka
+  <hendrik.lipka@gmx.de>)
+- Seems to compile fine under Cygwin
+
 1.1.3:
 - Added batch uploading capability (Victor R.)
 - Removed the need for a $HOME/.unixnpi.rc file - now reads serial speed 
@@ -13,7 +20,6 @@ now completely unnecessary)
 - created INSTALL file
 - created this (CHANGELOG) file
 - fixed COPYING file
-
 
 1.1.1:
 - removed registration requirement (Chayim I. Kirshen)

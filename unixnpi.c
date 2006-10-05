@@ -1,4 +1,4 @@
-/* UnixNPI 1.1.3 */
+/* UnixNPI 1.1.4 */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +10,19 @@
 
 /* Function prototype */
 void SigAlrm(int sigNo);
+
+#define NUM_STARS 32
+
+static char* stars(int number) {
+	static char string[NUM_STARS+1];
+	int i;
+	for(i=0; i<NUM_STARS; i++) {
+		if(i<number) string[i]='*';
+		else string[i]=' ';
+	}
+	string[NUM_STARS]='\0';
+	return string;
+}
 
 int main(int argc, char *argv[])
 {
@@ -28,8 +41,11 @@ int main(int argc, char *argv[])
 	/* Initialization */
 	fprintf(stdout, "\n");
 	fprintf(stdout, "UnixNPI - a Newton Package Installer for Unix platforms\n");
-	fprintf(stdout, "Version 1.1.3 by Richard C. L. Li, Victor Rehorst, Chayam Kirshen\n");
+	fprintf(stdout, "Version 1.1.4 by Richard C. L. Li, Victor Rehorst, Chayam Kirshen\n");
+	fprintf(stdout, "patches by Phil <phil@squack.COM>, Heinrik Lipka\n");
 	fprintf(stdout, "This program is distributed under the terms of the GNU GPL: see the file COPYING\n");
+
+	strcpy(newtDevInfo.devName, "/dev/newton");
 
 	/* Install time out function */
 	if(signal(SIGALRM, SigAlrm) == SIG_ERR)
@@ -37,13 +53,13 @@ int main(int argc, char *argv[])
 
 	/* Check arguments */
 	if(argc < 2)
-		ErrHandler("Usage: unixnpi [-s speed] PkgFiles...");
+		ErrHandler("Usage: unixnpi [-s speed] [-d device] PkgFiles...");
 	else
 	{
 		if (strcmp(argv[1],"-s") == 0)
 		{
 			if (argc < 4)
-				ErrHandler("Usage: unixnpi [-s speed] PkgFiles...");
+				ErrHandler("Usage: unixnpi [-s speed] [-d device] PkgFiles...");
 			newtDevInfo.speed = atoi(argv[2]);
 			k = 3;
 		}
@@ -52,9 +68,14 @@ int main(int argc, char *argv[])
 			newtDevInfo.speed = 38400;
 			k = 1;
 		}
+		if (strcmp(argv[k],"-d")==0)
+		{
+			if (argc<(k+1))
+				ErrHandler("Usage: unixnpi [-s speed] [-d device] PkgFiles...");
+			strcpy(newtDevInfo.devName, argv[k+1]);
+			k+=2;			
+		}
 	}
-
-	strcpy(newtDevInfo.devName, "/dev/newton");
 
 	/* Initialize Newton device */
 	if((newtFd = InitNewtDev(&newtDevInfo)) < 0)
@@ -138,7 +159,7 @@ int main(int argc, char *argv[])
 		fseek(inFile, 0, SEEK_END);
 		inFileLen = ftell(inFile);
 		rewind(inFile);
-		printf("File is '%s'\n", argv[k]);
+		/* printf("File is '%s'\n", argv[k]); */
 
 		/* Send LT frame newtdocklpkg */
 		alarm(TimeOut);
@@ -154,11 +175,14 @@ int main(int argc, char *argv[])
 		ltSeqNo++;
 		/* fprintf(stdout, ".\n"); */
 
-		fprintf(stdout, "Sending %d / %d\r", 0, inFileLen);
+		/* fprintf(stdout, "Sending %d / %d\r", 0, inFileLen); */
+		fprintf(stdout, "%20s %3d%% |%s| %d\r",
+			argv[k], 0, stars(0), 0);
 		fflush(stdout);
 	
 		/* Send package data */
 		while(!feof(inFile)) {
+                        int bytes;
 			alarm(TimeOut);
 			i = fread(sendBuf, sizeof(uchar), MaxInfoLen, inFile);
 			while(i % 4 != 0)
@@ -168,12 +192,19 @@ int main(int argc, char *argv[])
 			} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
 			ltSeqNo++;
 			if(ltSeqNo % 4 == 0) {
-				fprintf(stdout, "Sending %d / %d\r", ftell(inFile), inFileLen);
+				/* fprintf(stdout, "Sending %d / %d\r", ftell(inFile), inFileLen); */
+				bytes=ftell(inFile);
+				fprintf(stdout, "%20s %3d%% |%s| %d\r",
+					argv[k], 
+					(int)(((float)bytes/(float)inFileLen)*100), 
+					stars(((float)bytes/(float)inFileLen)*NUM_STARS), 
+					bytes);	
 				fflush(stdout);
 			}
 		}
-		fprintf(stdout, "Sending %d / %d\n", inFileLen, inFileLen);
-	
+		/* fprintf(stdout, "Sending %d / %d\n", inFileLen, inFileLen); */
+		fprintf(stdout, "\n");
+
 		/* Wait LT frame newtdockdres */
 		alarm(TimeOut);
 		while(RecvFrame(newtFd, recvBuf) < 0 || recvBuf[1] != '\x04');

@@ -1,14 +1,17 @@
-UnixNPI 1.1.3, a package installer for UN*X systems
+UnixNPI 1.1.4, a package installer for UN*X systems
 originally written by Richard C.I. Li
 modified and maintained by:
 	Chayim I. Kirshen <ckirshen@linuxppc.org>
 	Victor Rehorst <chuma@chuma.org>
+patches by:
+	Hendrik Lipka <hendrik.lipka@gmx.de>
+	Phil <phil@squack.com>
 
-The original UnixNPI homepage is at:
+The original UnixNPI homepage (for historical purposes ONLY) is at:
 http://www.ee.cityu.edu.hk/~clli/unixnpi.html
 
 The new UnixNPI homepage is at:
-http://unixnpi.sourceforge.net
+http://unixnpi.sf.net
 
 Below is a modified version of the original README file which was included
 with the binary distributons of UnixNPI.  More documentation is coming
@@ -41,28 +44,13 @@ Features
    - Unlimited Package size
    - Use the built in "Connection" application
    - No need for additional software in your Newton
-
--------------------------------------------------------------------------------
-
-Archive Contents (for binary distributions)
-
-   unixnpi             binary executable
-   unixnpi.rc          sample configuration file
-   StatueMonitor.pkg   test package for unixnpi
-   README              this file
+   - Can install multiple packages in a row (batch installing)
 
 -------------------------------------------------------------------------------
 
 Installation
 
-   1. Get the archive for your machine type.
-   2. Unpack the archive.
-   3. Copy the executable "unixnpi" to your executable search path.
-   4. Copy the file "unixnpi.rc" to your home directory as ".unixnpi.rc".
-   5. Edit the file ".unixnpi.rc" to set the path for your Newton Device or
-      create a symbolic link of "/dev/newton" for your device.
-   6. If you have "Ser57600.pkg", "Ser115200.pkg" or "Ser230400.pkg" installed,
-      set the speed to 57600, 115200 or 230400 respectively.
+Please see the file INSTALL for installation instructions.
 
 -------------------------------------------------------------------------------
 
@@ -88,6 +76,5 @@ Registration
 
 UnixNPI was once shareware, but is now open source software under the GNU
 General Public Licence (GNU GPL).  See the file COPYING for more details.
-
 
 -------------------------------------------------------------------------------
