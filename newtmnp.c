@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <unistd.h>
 #include "newtmnp.h"
 
 /* Constants definition */
@@ -37,14 +38,14 @@ int InitNewtDev(NewtDevInfo *newtDevInfo)
 	intNewtFd = -1;
 	if(signal(SIGINT, SigInt) == SIG_ERR)
 		ErrHandler("Error in setting up interrupt function!!");
-		
+
 	/* Open the Newton device */
 	if((newtFd = open(newtDevInfo->devName, O_RDWR)) == -1)
 		return -1;
-	
+
 	/* Get the current device settings */
 	tcgetattr(newtFd, &newtTty);
-	
+
 	/* Change the device settings */
 	newtTty.c_iflag = IGNBRK | INPCK;
 	newtTty.c_oflag = 0;
@@ -52,7 +53,7 @@ int InitNewtDev(NewtDevInfo *newtDevInfo)
 	newtTty.c_lflag = 0;
 	newtTty.c_cc[VMIN] = 1;
 	newtTty.c_cc[VTIME] = 0;
-	
+
 	/* Select the communication speed */
 	switch(newtDevInfo->speed) {
 		#ifdef B2400
@@ -107,11 +108,11 @@ int InitNewtDev(NewtDevInfo *newtDevInfo)
 			close(newtFd);
 			return -1;
 		}
-	
+
 	/* Flush the device and restarts input and output */
 	tcflush(newtFd, TCIOFLUSH);
 	tcflow(newtFd, TCOON);
-	
+
 	/* Update the new device settings */
 	tcsetattr(newtFd, TCSANOW, &newtTty);
 
@@ -124,7 +125,7 @@ void FCSCalc(ushort *fcsWord, unsigned char octet)
 {
 	int i;
 	uchar pow;
-	
+
 	pow = 1;
 	for(i = 0; i < 8; i++) {
 		if((((*fcsWord % 256) & 0x01) == 0x01) ^ ((octet & pow) == pow))
@@ -141,14 +142,14 @@ void SendFrame(int newtFd, uchar *head, uchar *info, int infoLen)
 	int i;
 	ushort fcsWord;
 	uchar buf;
-	
+
 	/* Initialize */
 	fcsWord = 0;
-	
+
 	/* Send frame start */
 	if(write(newtFd, FrameStart, 3) < 0)
 		ErrHandler(errMesg);
-	
+
 	/* Send frame head */
 	for(i = 0; i <= head[0]; i++) {
 		FCSCalc(&fcsWord, head[i]);
@@ -159,7 +160,7 @@ void SendFrame(int newtFd, uchar *head, uchar *info, int infoLen)
 				ErrHandler(errMesg);
 			}
 		}
-	
+
 	/* Send frame information */
 	if(info != NULL) {
 		for(i = 0; i < infoLen; i++) {
@@ -195,13 +196,13 @@ void SendLTFrame(int newtFd, uchar seqNo, uchar *info, int infoLen)
 		'\x02', /* Length of header */
 		'\x04', /* Type indication LT frame */
 		};
-	
+
 	ltFrameHead[2] = seqNo;
 	SendFrame(newtFd, ltFrameHead, info, infoLen);
 
 	return;
 }
-	
+
 void SendLAFrame(int newtFd, uchar seqNo)
 {
 	uchar laFrameHead[4] = {
@@ -213,7 +214,7 @@ void SendLAFrame(int newtFd, uchar seqNo)
 
 	laFrameHead[2] = seqNo;
 	SendFrame(newtFd, laFrameHead, NULL, 0);
-	
+
 	return;
 }
 
@@ -224,11 +225,11 @@ int RecvFrame(int newtFd, unsigned char *frame)
 	unsigned char buf;
 	unsigned short fcsWord;
 	int i;
-	
+
 	/* Initialize */
 	fcsWord = 0;
 	i = 0;
-	
+
 	/* Wait for head */
 	state = 0;
 	while(state < 3) {
@@ -253,7 +254,7 @@ int RecvFrame(int newtFd, unsigned char *frame)
 				break;
 			}
 		}
-	
+
 	/* Wait for tail */
 	state = 0;
 	while(state < 2) {
@@ -295,7 +296,7 @@ int RecvFrame(int newtFd, unsigned char *frame)
 				break;
 			}
 		}
-		
+
 	/* Check FCS */
 	if(read(newtFd, &buf, 1) < 0)
 		ErrHandler(errMesg);
@@ -333,11 +334,11 @@ int WaitLDFrame(int newtFd)
 	unsigned char buf;
 	unsigned short fcsWord;
 	int i;
-	
+
 	/* Initialize */
 	fcsWord = 0;
 	i = 0;
-	
+
 	/* Wait for head */
 	state = 0;
 	while(state < 5) {
@@ -376,7 +377,7 @@ int WaitLDFrame(int newtFd)
 				break;
 			}
 		}
-	
+
 	/* Wait for tail */
 	state = 0;
 	while(state < 2) {
@@ -405,7 +406,7 @@ int WaitLDFrame(int newtFd)
 				break;
 			}
 		}
-		
+
 	/* Check FCS */
 	if(read(newtFd, &buf, 1) < 0)
 		ErrHandler(errMesg);
@@ -424,7 +425,7 @@ void ErrHandler(char *errMesg)
 	fprintf(stderr, "\n");
 	fprintf(stderr, errMesg);
 	fprintf(stderr, "\n\n");
-	exit(0);
+	_exit(0);
 }
 
 void SigInt(int sigNo)
@@ -432,7 +433,7 @@ void SigInt(int sigNo)
 	if(intNewtFd >= 0) {
 		/* Wait for all buffer sent */
 		tcdrain(intNewtFd);
-		
+
 		SendFrame(intNewtFd, LDFrame, NULL, 0);
 		}
 	ErrHandler("User interrupted, connection stopped!!");

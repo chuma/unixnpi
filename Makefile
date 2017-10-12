@@ -12,7 +12,7 @@ debug:
 	cp *.h backup
 	$(CC) -g -o $(TARGET) $(SRCS)
 	
-unixnpi:
+unixnpi: $(SRCS)
 	$(CC) -o $(TARGET) $(SRCS)
 
 clean:

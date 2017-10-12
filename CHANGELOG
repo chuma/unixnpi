@@ -1,3 +1,11 @@
+2017 October 12 Victor Rehorst <victor@chuma.org>
+- Included unistd.h header
+- Define version number as a macro
+- Fixed Makefile rules
+- Updated documentation
+- Reorganized directory structure
+- Imported code to Github from SourceForge
+
 1.1.4:
 - Changed Makefile to use cc by default instead of gcc
 - Added progress bar (Phil <phil@squack.com>)

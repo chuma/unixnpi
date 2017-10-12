@@ -1,10 +1,13 @@
-/* UnixNPI 1.1.4 */
+/* UnixNPI */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 #include "newtmnp.h"
+
+#define VERSION "1.1.5"
 
 #define TimeOut 30
 
@@ -35,13 +38,13 @@ int main(int argc, char *argv[])
 	int newtFd;
 	uchar ltSeqNo;
 	int i, j, k;
-	
+
 	k = 1;
-	
+
 	/* Initialization */
 	fprintf(stdout, "\n");
 	fprintf(stdout, "UnixNPI - a Newton Package Installer for Unix platforms\n");
-	fprintf(stdout, "Version 1.1.4 by Richard C. L. Li, Victor Rehorst, Chayam Kirshen\n");
+	fprintf(stdout, "Version " VERSION " by Richard C. L. Li, Victor Rehorst, Chayam Kirshen\n");
 	fprintf(stdout, "patches by Phil <phil@squack.COM>, Heinrik Lipka\n");
 	fprintf(stdout, "This program is distributed under the terms of the GNU GPL: see the file COPYING\n");
 
@@ -73,7 +76,7 @@ int main(int argc, char *argv[])
 			if (argc<(k+1))
 				ErrHandler("Usage: unixnpi [-s speed] [-d device] PkgFiles...");
 			strcpy(newtDevInfo.devName, argv[k+1]);
-			k+=2;			
+			k+=2;
 		}
 	}
 
@@ -81,7 +84,7 @@ int main(int argc, char *argv[])
 	if((newtFd = InitNewtDev(&newtDevInfo)) < 0)
 		ErrHandler("Error in opening Newton device!!\nDo you have a symlink to /dev/newton?");
 	ltSeqNo = 0;
-	
+
 	/* Waiting to connect */
 	fprintf(stdout, "\nWaiting to connect\n");
 	do {
@@ -90,7 +93,7 @@ int main(int argc, char *argv[])
 	fprintf(stdout, "Connected\n");
 	fprintf(stdout, "Handshaking");
 	fflush(stdout);
-	
+
 	/* Send LR frame */
 	alarm(TimeOut);
 	do {
@@ -99,7 +102,7 @@ int main(int argc, char *argv[])
 	ltSeqNo++;
 	fprintf(stdout, ".");
 	fflush(stdout);
-	
+
 	/* Wait LT frame newtdockrtdk */
 	while(RecvFrame(newtFd, recvBuf) < 0 || recvBuf[1] != '\x04');
 	SendLAFrame(newtFd, recvBuf[2]);
@@ -114,14 +117,14 @@ int main(int argc, char *argv[])
 	ltSeqNo++;
 	fprintf(stdout, ".");
 	fflush(stdout);
-	
+
 	/* Wait LT frame newtdockname */
 	alarm(TimeOut);
 	while(RecvFrame(newtFd, recvBuf) < 0 || recvBuf[1] != '\x04');
 	SendLAFrame(newtFd, recvBuf[2]);
 	fprintf(stdout, ".");
 	fflush(stdout);
-	
+
 	/* Get owner name */
 	i = recvBuf[19] * 256 * 256 * 256 + recvBuf[20] * 256 * 256 + recvBuf[21] *
 		256 + recvBuf[22];
@@ -179,7 +182,7 @@ int main(int argc, char *argv[])
 		fprintf(stdout, "%20s %3d%% |%s| %d\r",
 			argv[k], 0, stars(0), 0);
 		fflush(stdout);
-	
+
 		/* Send package data */
 		while(!feof(inFile)) {
                         int bytes;
@@ -195,10 +198,10 @@ int main(int argc, char *argv[])
 				/* fprintf(stdout, "Sending %d / %d\r", ftell(inFile), inFileLen); */
 				bytes=ftell(inFile);
 				fprintf(stdout, "%20s %3d%% |%s| %d\r",
-					argv[k], 
-					(int)(((float)bytes/(float)inFileLen)*100), 
-					stars(((float)bytes/(float)inFileLen)*NUM_STARS), 
-					bytes);	
+					argv[k],
+					(int)(((float)bytes/(float)inFileLen)*100),
+					stars(((float)bytes/(float)inFileLen)*NUM_STARS),
+					bytes);
 				fflush(stdout);
 			}
 		}
@@ -219,12 +222,12 @@ int main(int argc, char *argv[])
 	do {
 		SendLTFrame(newtFd, ltSeqNo, "newtdockdisc\0\0\0\0", 16);
 	} while(WaitLAFrame(newtFd, ltSeqNo) < 0);
-	
+
 	/* Wait disconnect */
 	alarm(0);
 	WaitLDFrame(newtFd);
 	fprintf(stdout, "Finished!!\n\n");
-			
+
 	/* fclose(inFile); */
 	close(newtFd);
 	return 0;
