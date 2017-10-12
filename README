@@ -1,17 +1,22 @@
 UnixNPI 1.1.4, a package installer for UN*X systems
 originally written by Richard C.I. Li
 modified and maintained by:
+	Victor Rehorst <victor@chuma.org>
 	Chayim I. Kirshen <ckirshen@linuxppc.org>
-	Victor Rehorst <chuma@chuma.org>
 patches by:
 	Hendrik Lipka <hendrik.lipka@gmx.de>
 	Phil <phil@squack.com>
 
-The original UnixNPI homepage (for historical purposes ONLY) is at:
+The original UnixNPI homepage (for historical purposes ONLY) was at:
 http://www.ee.cityu.edu.hk/~clli/unixnpi.html
+and is archived at:
+https://web.archive.org/web/20121030074828/http://www.ee.cityu.edu.hk:80/~clli/unixnpi.html
 
-The new UnixNPI homepage is at:
+The original open-source UnixNPI homepage is at:
 http://unixnpi.sf.net
+
+The latest UnixNPI homepage is:
+http://github.com/chuma/unixnpi
 
 Below is a modified version of the original README file which was included
 with the binary distributons of UnixNPI.  More documentation is coming

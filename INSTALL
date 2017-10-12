@@ -1,3 +1,10 @@
+Requirements:
+
+- a C compiler
+- C standard library
+- POSIX compatible headers
+- a serial port device connected to a NewtonOS device (any OS version)
+
 1)  Compile the program: 'make' should be all that is necessary.
 
 2)  [Optional] As root, create a symlink from the appropriate serial port
