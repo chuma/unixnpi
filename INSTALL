@@ -1,0 +1,14 @@
+1)  Compile the program: 'make' should be all that is necessary.
+
+2)  [Optional] As root, create a symlink from the appropriate serial port
+device to /dev/newton (eg. 'ln -s /dev/ttyS0 /dev/newton')
+
+3)  Make sure you have appropriate permissions to read/write to the 
+serial port.
+
+4)  Run UnixNPI.  If you don't specify the -d or -s options, the program
+will default to /dev/newton for the serial device and 38400bps for the
+port speed.
+
+That's all!  You can copy the unixnpi binary anywhere in your path you 
+like.

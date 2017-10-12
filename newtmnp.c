@@ -5,7 +5,6 @@
 #include <fcntl.h>
 #include <signal.h>
 #include "newtmnp.h"
-#include "encrypt.h"
 
 /* Constants definition */
 uchar FrameStart[] = "\x16\x10\x02";
