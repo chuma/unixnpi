@@ -17,5 +17,10 @@ serial port.
 will default to /dev/newton for the serial device and 38400bps for the
 port speed.
 
+5)  [Optional]  If you uncompress one of the packages in the NewtonOS/
+directory and install it to your Newton, you will be able to install
+packages at a faster speed.  57600bps is supported by all devices.
+115200 and 230400 bps speeds require NewtonOS 2.x.
+
 That's all!  You can copy the unixnpi binary anywhere in your path you 
 like.

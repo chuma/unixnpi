@@ -1,0 +1,15 @@
+These are installable NewtonOS packages to enable faster serial communications
+speeds when using the built-in "Connection" or "Dock" tool.
+
+Installing them will add a new connection option, with the supported speed
+(in bits per second) to the "Connection" or "Dock" tool on your NewtonOS
+device.
+
+These packages were created by the original author of UnixNPI, Richard C.L. Li
+
+The files have been compressed with GZip; you must uncompress them before
+installing them on a NewtonOS device.
+
+Source code is included; the packages were written on a Newton using Steve
+Weyer's NewtDevEnv (http://communicrossings.com/html/newton/newtdev.htm)
+
